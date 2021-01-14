@@ -8,6 +8,7 @@ import userRouter from "./routers/userRouter";
 import videoRouter from "./routers/videoRouter";
 import globalRouter from "./routers/globalRouter";
 import routes from "./routes";
+import {localsMeddleware} from "./middlewares";
 const app = express();
 //const PORT=4000;
 
@@ -49,14 +50,43 @@ function md5(req,res,next){
 //const handleHome = (req, res) => res.send("hello from home");
 
 //const handleProfile = (req, res) => res.send("you ar on my profile");
+
+// app.use(function(req,res,next){
+//     res.setHeader("content_security_policy", "default-src 'self' style-src 'self' 'unsafe-inline'");
+//     return next();
+// });
+app.use(function(req, res, next) {
+    res.setHeader("Content-Security-Policy", "style-src 'unsafe-inline'", "img-src 'unsafe-inline'", "script-src 'none' https://archive.org");
+    return next();
+});
+// app.use( helmet({ contentSecurityPolicy: false }));     //helmet의 보안정책으로 인해 contentSecurityPolicy: false 추가
+// app.use(                //fontawsome을 사용하기 위해 helmet의 default설정을 변경
+//     helmet.contentSecurityPolicy({
+//         directives: {
+//             defaultSrc: ["'self'", "http://*.fontawesome.com"],
+//             scriptSrc: ["'self'", "http://*.fontawesome.com"],
+//             styleSrc: ["'self'", "'unsafe-inline'"],
+//             upgradeInsecureRequests: [],
+//         },
+//     })
+// );
 app.set("view engine","pug");
 app.use(cookieParser());
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended : true}));          //bodyParser는 설정을 통해 user가 보내온 data가 무엇인지 이해하는 방법이다
-app.use(helmet());
 app.use(morgan("dev"));
 //app.use([md1,md2,md3,md4,md5]);
 //app.use는 원하는 middleware를 모든 route에 사용할 수 있다
+
+
+app.use(localsMeddleware);
+/*
+localMiddleware라는 함수를 따로 만들어서 local변수를 통해 global 변수로 만들어 준다.
+이를 통해서 우리는 template에서 routes변수를 사용해서 url을 조작할 수 있게 한다
+그래서 template에서는 url을 직접 작성하는 것이 아니라 routes.js에 있는 변수로서 url을 조작하게 만들어 준다
+*/
+
+
 
 //app.get("/",betweenHome,handleHome);
 //app.get("/",handleHome);
